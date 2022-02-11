@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - NPC
   layers:
   - Default
   - TransparentFX
@@ -15,20 +16,20 @@ TagManager:
   - 
   - PassPlayer
   - Player
+  - 
   - PassGround
   - Ground
   - 
+  - NonBlockObject
+  - BlockObject
+  - 
+  - NPC
   - 
   - 
   - 
   - 
   - 
   - 
-  - 
-  - 
-  - Hair
-  - Shirt
-  - Pant
   - 
   - 
   - 

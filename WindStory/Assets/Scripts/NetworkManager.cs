@@ -18,6 +18,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 30;
         ServerConnectPanel.SetActive(true);
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Player"), true);
     }
 
     public void Connect() => PhotonNetwork.ConnectUsingSettings();
