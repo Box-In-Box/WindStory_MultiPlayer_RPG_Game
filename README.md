@@ -4,6 +4,7 @@ make multiplayer side-scrolling RPG game
 ```
     ●조작 ↑ ↓ ← ↑ , 점프 ↑, 더블 점프 ↑↑, 다운점프 ↓, 맵 이동 ↓
     ●상호작용 = space
+    ●Using Unity
     ●Using WindSlayer Image, Sound
     ●Using PhotonServer + PlayFeb
     ●Player Asset : https://assetstore.unity.com/publishers/45049
