@@ -6,12 +6,17 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using Cinemachine;
 
-
+/*
+ * 
+ * XXX 속도가 내려갈때 가속되면 콜라이더 뚫고 내려가버림
+ * 
+ */
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
     public Rigidbody2D rigid;
     public Animator anim;
     public PhotonView PV;
+    public TransferMap theTransfer;
 
     [Header ("---Setting---")]
     [SerializeField] [Range(1f, 10f)] float speed = 5f;
@@ -24,9 +29,20 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     public bool doubleJumpState;
     public bool isMove;
 
+    [Header("---Camera---")]
+    public static CinemachineVirtualCamera chinemaCamera;
+    public static CinemachineConfiner chinemaConfiner;
+    public Collider2D currentChinemaCollider;
+
     [Header("---Sound---")]
     public string walkSound;
     public bool timeCheck = true;
+
+    [Header("---MAP---")]
+    public GameObject transfer;
+    public string currentMapName;
+    public string targetMapName;
+    public bool isInTransferObj;
 
     [Header("---ETC---")]
     public string npcName;
@@ -46,24 +62,28 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         if (PV.IsMine)
         {
             //2D 카메라
-            var CM = GameObject.Find("CMCamera").GetComponent<CinemachineVirtualCamera>();
-            CM.Follow = transform;
-            CM.LookAt = transform;
+            chinemaCamera = GameObject.Find("CMCamera").GetComponent<CinemachineVirtualCamera>();
+            chinemaCamera.Follow = transform;
+            chinemaCamera.LookAt = transform;
+            chinemaConfiner = FindObjectOfType<CinemachineConfiner>();
+            chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
 
             //레이어 통과
             playerLayer = LayerMask.NameToLayer("Player");
-            passgroundLayer = LayerMask.NameToLayer("PassGround");
-            passplayerLayer = LayerMask.NameToLayer("PassPlayer");  
+            passplayerLayer = LayerMask.NameToLayer("PassPlayer");
+            passgroundLayer = LayerMask.NameToLayer("PassGround"); 
+            Physics2D.IgnoreLayerCollision(playerLayer, playerLayer, true);
+            Physics2D.IgnoreLayerCollision(playerLayer, passplayerLayer, true);
         }
         //닉네임
         transform.Find("Canvas").gameObject.transform.Find("NickNameText").gameObject.GetComponent<Text>().text = PV.IsMine ? PhotonNetwork.LocalPlayer.NickName : PV.Owner.NickName;
-
     }
 
     void Start()
     {
         theAudio = FindObjectOfType<AudioManager>();
         theNpc = FindObjectOfType<NpcScript>();
+        theTransfer = FindObjectOfType<TransferMap>();
     }
 
     void Update()
@@ -107,17 +127,33 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 PV.RPC("jumpRPC", RpcTarget.All);
             }
 
-            //레이어 위로통과
+            //↑ 레이어 위로통과
             if (rigid.velocity.y > 0)
                 Physics2D.IgnoreLayerCollision(playerLayer, passgroundLayer, true);
             else
                 Physics2D.IgnoreLayerCollision(playerLayer, passgroundLayer, false);
 
-            //레이어 아래로통과
+            //↓ 레이어 아래로통과
             if (isUpGround && Input.GetKeyDown(KeyCode.DownArrow))
             {
                 float curY = transform.position.y;
                 StartCoroutine("PassGround", curY);
+            }
+            //↓ 맵이동
+            if (isInTransferObj)
+            {
+                targetMapName = transfer.gameObject.GetComponent<TransferMap>().targetPoint.parent.name;  //이동할 맵 표시
+                if(Input.GetKeyDown(KeyCode.DownArrow)) //맵 이동
+                {
+                    //카메라 설정
+                    chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
+                    currentMapName = transfer.gameObject.GetComponent<TransferMap>().targetPoint.parent.name;
+
+                    //플레이어 카메라 설정
+                    transform.position = transfer.gameObject.GetComponent<TransferMap>().targetPoint.transform.position;
+                    currentChinemaCollider = transfer.gameObject.GetComponent<TransferMap>().targetPoint.transform.parent.gameObject.transform.Find("CMRange_"+currentMapName).gameObject.GetComponent<Collider2D>();
+                    chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
+                }   
             }
 
             //사운드
@@ -148,7 +184,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         //IsMine이 아닌 것들
         //움직임
         else if ((transform.position - curPos).sqrMagnitude >= 100) transform.position = curPos;
-        else transform.position = Vector3.Lerp(this.gameObject.transform.position, curPos, Time.deltaTime * 10);   //부드러운 움직임 구현 필요 버그 발생!!!
+        else transform.position = Vector3.Lerp(this.gameObject.transform.position, curPos, Time.deltaTime * 10);
     }
 
     [PunRPC]    //좌우반전
@@ -207,7 +243,20 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             npcName = col.gameObject.name;
             npcNum = col.gameObject.GetComponent<ObjectData>().id;
             isNpcTrigger = true;
-        } 
+        }
+        //맵이동 온 트리거
+        else if (col.gameObject.tag == "Transfer")
+        {
+            transfer = col.gameObject;
+            isInTransferObj = true;
+        }
+        //처음 맵 확인용
+        else if (col.gameObject.tag == "MapRange")
+        {
+            currentMapName = col.gameObject.transform.parent.name;
+            currentChinemaCollider = col.gameObject.GetComponent<PolygonCollider2D>();
+            chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D col)
@@ -218,6 +267,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             npcName = "";
             npcNum = -1;
             isNpcTrigger = false;
+        }
+        //맵이동 오프 트리거
+        else if (col.gameObject.tag == "Transfer")
+        {
+            transfer = null;
+            isInTransferObj = false;
+            targetMapName = "";
         }
     }
 

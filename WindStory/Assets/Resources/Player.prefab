@@ -431,6 +431,7 @@ MonoBehaviour:
   rigid: {fileID: 5102277656729365826}
   anim: {fileID: 8044692396672922074}
   PV: {fileID: 6203851538869258052}
+  theTransfer: {fileID: 0}
   speed: 5
   jumpForce: 400
   isFacingRight: 1
@@ -438,8 +439,13 @@ MonoBehaviour:
   isGround: 0
   doubleJumpState: 0
   isMove: 0
-  walkSound: walk
+  currentChinemaCollider: {fileID: 0}
+  walkSound: Walk
   timeCheck: 1
+  transfer: {fileID: 0}
+  currentMapName: 
+  targetMapName: 
+  isInTransferObj: 0
   npcName: 
   npcNum: 0
   talkIndex: 0
