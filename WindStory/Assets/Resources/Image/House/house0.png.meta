@@ -4,13 +4,13 @@ TextureImporter:
   internalIDToNameTable:
   - first:
       213: 7266669126627227417
-    second: house0_0
-  - first:
-      213: 4496614188746324633
     second: house0_1
   - first:
+      213: 4496614188746324633
+    second: house0_0
+  - first:
       213: 2145660765973115162
-    second: house0_2
+    second: house0_1
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -112,7 +112,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: house0_0
+      name: house0_2
       rect:
         serializedVersion: 2
         x: 0
@@ -120,7 +120,7 @@ TextureImporter:
         width: 286
         height: 231
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -133,7 +133,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: house0_1
+      name: house0_0
       rect:
         serializedVersion: 2
         x: 345
@@ -141,7 +141,7 @@ TextureImporter:
         width: 394
         height: 301
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -154,7 +154,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: house0_2
+      name: house0_1
       rect:
         serializedVersion: 2
         x: 0
@@ -162,7 +162,7 @@ TextureImporter:
         width: 345
         height: 276
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []

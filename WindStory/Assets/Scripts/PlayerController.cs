@@ -23,9 +23,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] [Range(100f, 500f)] float jumpForce = 100f;
 
     [Header ("---Check---")]
-    public bool isFacingRight = true;
-    public bool isUpGround; //체크
+    public bool isFacingRight;
     public bool isGround;
+    public bool isUpGround;
     public bool doubleJumpState;
     public bool isMove;
 
@@ -98,6 +98,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             {
                 PV.RPC("FlipXRPC", RpcTarget.AllBuffered);
             }
+            //경사면 에서 위치 고정(안미끄러짐)
             if (axis != 0)
             {
                 isMove = true;
@@ -114,10 +115,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             //바닥체크
             isGround = Physics2D.OverlapCircle((Vector2)transform.position, 0.3f, 1 << LayerMask.NameToLayer("Ground"));
             isUpGround = Physics2D.OverlapCircle((Vector2)transform.position, 0.3f, 1 << LayerMask.NameToLayer("PassGround"));
-            if (isUpGround) isGround = true;
             Debug.DrawRay(transform.position, new Vector2(0, 0.3f), Color.red);
 
             //↑ 점프, ↑↑ 더블 점프
+            if (isUpGround) isGround = true;
             if (isGround) doubleJumpState = true;
             PV.RPC("animationRPC", RpcTarget.AllBuffered, "isJump", !isGround);
             if (Input.GetKeyDown(KeyCode.UpArrow) && isGround) PV.RPC("jumpRPC", RpcTarget.All);
@@ -227,12 +228,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         yield return new WaitForSeconds(delayTime);
         timeCheck = true;
-    }
-
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        //바닥체크
-        if (col.gameObject.tag == "Ground") isGround = true;
     }
 
     private void OnTriggerEnter2D(Collider2D col)

@@ -13,9 +13,13 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public static NetworkManager instance;
 
     [Header("---PlayFab---")]
-    public InputField EmailInput;
-    public InputField PasswordInput;
-    public InputField UsernameInput;
+    public InputField LoginEmailInput;
+    public InputField LoginPasswordInput;
+
+    public InputField RegisterEmailInput;
+    public InputField RegisterPasswordInput;
+    public InputField RegisterUsernameInput;
+
     public RobbyManager robbyManager;
     public bool isLogin = false;
 
@@ -38,13 +42,13 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public void Login()
     {
-        var request = new LoginWithEmailAddressRequest { Email = EmailInput.text, Password = PasswordInput.text };
+        var request = new LoginWithEmailAddressRequest { Email = LoginEmailInput.text, Password = LoginPasswordInput.text };
         PlayFabClientAPI.LoginWithEmailAddress(request, OnLoginSuccess, OnLoginFailure);
     }
 
-    public void RegisterBtn()
+    public void Register()
     {
-        var request = new RegisterPlayFabUserRequest { Email = EmailInput.text, Password = PasswordInput.text, Username = UsernameInput.text };
+        var request = new RegisterPlayFabUserRequest { Email = RegisterEmailInput.text, Password = RegisterPasswordInput.text, Username = RegisterUsernameInput.text };
         PlayFabClientAPI.RegisterPlayFabUser(request, OnRegisterSuccess, OnRegisterFailure);
     }
 
@@ -90,20 +94,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom)
         {
-            print("방 이름 : " + PhotonNetwork.CurrentRoom.Name);
-            print("방 인원수 : " + PhotonNetwork.CurrentRoom.PlayerCount + " / " + PhotonNetwork.CurrentRoom.MaxPlayers);
-            string playerStr = "플레이어 목록 : ";
-            for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++) 
-                playerStr += PhotonNetwork.PlayerList[i].NickName + ((i + 1 == PhotonNetwork.PlayerList.Length) ? "" : ", ");
-            print(playerStr);
-        }
-        else
-        {
-            print("접속한 인원 수 : " + PhotonNetwork.CountOfPlayers);
-            print("방 개수 : " + PhotonNetwork.CountOfRooms);
-            print("모든 방에 있는 인원 수 : " + PhotonNetwork.CountOfPlayersInRooms);
-            print("로비에 있는지? : " + PhotonNetwork.InLobby);
-            print("연결됐는지? : " + PhotonNetwork.IsConnected);
+            string info = "방 이름 : " + PhotonNetwork.CurrentRoom.Name;
+            info += ", 방 인원수 : " + PhotonNetwork.CurrentRoom.PlayerCount + "/" + PhotonNetwork.CurrentRoom.MaxPlayers;
+            info += ", 플레이어 목록 : ";
+            for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+                info += PhotonNetwork.PlayerList[i].NickName + ((i + 1 == PhotonNetwork.PlayerList.Length) ? "" : ", ");
+            print(info);
         }
     }
     #endregion

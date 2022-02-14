@@ -9,8 +9,8 @@ public class RobbyManager : MonoBehaviour
 {
     [Header("---serverConnect---")]
     public GameObject ServerConnectPanel;
-    public InputField EmailInput, PasswordInput, UsernameInput;
-    public Button LoginBtn;
+    public Button loginTapBtn, registerTapBtn;
+    public GameObject loginTap, registerTap;
     public bool isLogin = false;
 
     [Header("---RobbyPanel---")]
@@ -58,11 +58,23 @@ public class RobbyManager : MonoBehaviour
                 if (next != null) next.Select();
             }
             //엔터로 로그인 클릭
-            else if (Input.GetKeyDown(KeyCode.Return))
-            {
-                LoginBtn.onClick.Invoke();
-            }
         }
+    }
+
+    public void LoginTap()
+    {
+        loginTap.SetActive(true);
+        registerTap.SetActive(false);
+        loginTapBtn.gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
+        registerTapBtn.gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.4f);
+    }
+
+    public void RegisterTap()
+    {
+        loginTap.SetActive(false);
+        registerTap.SetActive(true);
+        loginTapBtn.gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.4f);
+        registerTapBtn.gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
     }
 
     // ***선택된 이미지와 아닌 이미지 구분 스크립트 재변경 필요***
