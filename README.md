@@ -1,4 +1,4 @@
-# WindGame-MultiPlayer-RPG
+# WindStory_MultiPlayer_RPG_Game
 make multiplayer side-scrolling RPG game
 ## Developing...
 ```
