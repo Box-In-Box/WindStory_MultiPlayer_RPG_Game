@@ -16,11 +16,11 @@ TagManager:
   - Water
   - UI
   - 
-  - PassPlayer
   - Player
-  - 
-  - PassGround
+  - GroundPlayer
+  - PassPlayer
   - Ground
+  - PassGround
   - 
   - NonBlockObject
   - BlockObject
