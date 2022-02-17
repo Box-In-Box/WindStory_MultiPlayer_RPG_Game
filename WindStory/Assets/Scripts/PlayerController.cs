@@ -8,9 +8,7 @@ using Cinemachine;
 
 /*
  * 
- * fixed 속도가 내려갈때 가속되면 콜라이더 뚫고 내려가버림
- * 내 방향 앞에 타일이 있고 앞에밑에 타일이 있으면 rigid kinematic
- * 점프중에는 레이어 변경하면 안됨 콜라이더트리거 하나 더만들어서 (몸(상체))이안들어가있고 isground이면 착지
+ * 점프 후 땅에 떨어지면서 방향키 바꾸면 점프애니메이션 나감 /오류
  * 
  */
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
@@ -18,66 +16,53 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     public Rigidbody2D rigid;
     public Animator anim;
     public PhotonView PV;
-    public TransferMap theTransfer;
-    public Transform groundCheckCollider;
+    public GameManager gameManager;
+    public ObjectData objectData;
 
     [Header ("---Setting---")]
     [SerializeField] [Range(1f, 10f)] float speed;
     [SerializeField] [Range(100f, 1000f)] float jumpForce;
-    [SerializeField] [Range(0f, 1f)] float checkGroundDistance = 0.3f;
+    [SerializeField] [Range(0f, 1f)] float checkGroundDistance;
 
-    [Header ("---Check---")]
+    [Header("---Check---")]
+    public bool spawnCheck;
     public bool isFacingRight;
     public bool isGround;
     public bool isUpGround;
     public bool doubleJumpState;
     public bool isMove;
-    private bool isJump;
-    
+    public bool isJump;
+    public bool canDoubleJump;
+
     [Header("---Sound---")]
     public string walkSound;
-    public bool timeCheck = true;
+    private bool timeCheck = true;
 
     [Header("---MAP---")]
-    public Collider2D currentChinemaCollider;
-    public GameObject transfer;
-    public string currentMapName;
-    public string targetMapName;
     public bool isInTransferObj;
-    public static CinemachineVirtualCamera chinemaCamera;
-    public static CinemachineConfiner chinemaConfiner;
+    public GameObject transfer;
 
     [Header("---ETC---")]
-    public string npcName;
-    public int npcNum;
-    public int talkIndex;
+    public GameObject scanObj;
     public bool isNpcTrigger;
 
-    private AudioManager theAudio;
-    private NpcScript theNpc;
+    private AudioManager audioManager;
 
     private float axis;
     Vector3 curPos;
-    int playerLayer, groundPlayerLayer, passPlayerLayer, groundLayer, passGroundLayer;
+    int playerLayer, passPlayerLayer, groundLayer, passGroundLayer;
 
     void Awake()
     {
         if (PV.IsMine)
         {
-            //2D 카메라
-            chinemaCamera = GameObject.Find("CMCamera").GetComponent<CinemachineVirtualCamera>();
-            chinemaCamera.Follow = transform;
-            chinemaCamera.LookAt = transform;
-            chinemaConfiner = FindObjectOfType<CinemachineConfiner>();
-            chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
-
             //레이어 통과
             playerLayer = LayerMask.NameToLayer("Player");
-            groundPlayerLayer = LayerMask.NameToLayer("GroundPlayer");
             passPlayerLayer = LayerMask.NameToLayer("PassPlayer");
             groundLayer = LayerMask.NameToLayer("Ground");
             passGroundLayer = LayerMask.NameToLayer("PassGround"); 
             Physics2D.IgnoreLayerCollision(playerLayer, playerLayer, true);
+            Physics2D.IgnoreLayerCollision(playerLayer, passPlayerLayer, true);
             Physics2D.IgnoreLayerCollision(playerLayer, passPlayerLayer, true);
         }
         //닉네임
@@ -86,102 +71,84 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     void Start()
     {
-        theAudio = FindObjectOfType<AudioManager>();
-        theNpc = FindObjectOfType<NpcScript>();
-        theTransfer = FindObjectOfType<TransferMap>();
+        audioManager = FindObjectOfType<AudioManager>();
+        gameManager = FindObjectOfType<GameManager>();
+        //게임메니저 셋팅
+        if (PV.IsMine) gameManager.Setting(gameObject);
     }
 
     void Update()
     {
         if (PV.IsMine)
         {
+            if (rigid.velocity != Vector2.zero) isMove = true;
+            else isMove = false;
+
             axis = Input.GetAxisRaw("Horizontal");
-            if ((axis > 0 && isFacingRight == false) || (axis < 0 && isFacingRight == true))
-            {
-                PV.RPC("FlipXRPC", RpcTarget.AllBuffered);
-            }
+
+            //달리기 anim
+            if ((axis > 0 && isFacingRight == false) || (axis < 0 && isFacingRight == true)) PV.RPC("FlipXRPC", RpcTarget.AllBuffered);
             //경사면 에서 위치 고정(안미끄러짐)
             if (axis != 0)
             {
-                isMove = true;
                 PV.RPC("animationRPC", RpcTarget.AllBuffered, "isRun", true);
                 rigid.constraints = RigidbodyConstraints2D.FreezeRotation; //키입력 받을때 프리즈 off
             }
             else
             {
-                isMove = false;
                 PV.RPC("animationRPC", RpcTarget.AllBuffered, "isRun", false);
                 rigid.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation; //키입력 안받을때 프리즈 on
             }
 
             //바닥체크
-            isGround = Physics2D.OverlapCircle((Vector2)transform.position, checkGroundDistance, 1 << groundLayer);
-            isUpGround = Physics2D.OverlapCircle((Vector2)transform.position, checkGroundDistance, 1 << passGroundLayer);
-            Debug.DrawRay(transform.position, Vector2.down * checkGroundDistance, Color.green);
-
-            //↑ 점프, ↑↑ 더블 점프
+            isGround = Physics2D.OverlapCircle((Vector2)transform.position, checkGroundDistance, LayerMask.GetMask("Ground"));
+            isUpGround = Physics2D.OverlapCircle((Vector2)transform.position, checkGroundDistance, LayerMask.GetMask("PassGround"));
             if (isUpGround) isGround = true;
             if (isGround) doubleJumpState = true;
+            Debug.DrawRay(transform.position, Vector2.down * checkGroundDistance, Color.green);
+        
+            //점프 anim
+            if (!isGround || isMove && gameObject.layer == passPlayerLayer) PV.RPC("animationRPC", RpcTarget.AllBuffered, "isJump", true);
+            else PV.RPC("animationRPC", RpcTarget.AllBuffered, "isJump", false);
 
-            PV.RPC("animationRPC", RpcTarget.AllBuffered, "isJump", !isGround);
-            if (Input.GetKeyDown(KeyCode.UpArrow) && isGround)
-            {
-                PV.RPC("jumpRPC", RpcTarget.All);
-            }
-            else if (Input.GetKeyDown(KeyCode.UpArrow) && doubleJumpState)
-            {
-                doubleJumpState = false;
+            //↑ 점프
+            if (Input.GetKeyDown(KeyCode.UpArrow) && isGround) PV.RPC("jumpRPC", RpcTarget.All);
+            //↑↑ 더블 점프
+            else if (Input.GetKeyDown(KeyCode.UpArrow) && doubleJumpState && canDoubleJump) 
+            { 
+                doubleJumpState = false; 
                 PV.RPC("jumpRPC", RpcTarget.All);
             }
 
             //↓ 레이어 아래로통과
             if (isUpGround && Input.GetKeyDown(KeyCode.DownArrow))
             {
-                StartCoroutine("PassDownGround", transform.position.y);
+                StartCoroutine("PassDownGroundCoroutine", transform.position.y);
             }
             //↓ 맵이동
             if (isInTransferObj)
             {
-                targetMapName = transfer.gameObject.GetComponent<TransferMap>().targetPoint.parent.name;  //이동할 맵 표시
-                if (Input.GetKeyDown(KeyCode.DownArrow)) //맵 이동
-                {
-                    //카메라 설정
-                    chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
-                    currentMapName = transfer.gameObject.GetComponent<TransferMap>().targetPoint.parent.name;
-
-                    //플레이어 카메라 설정
-                    transform.position = transfer.gameObject.GetComponent<TransferMap>().targetPoint.transform.position;
-                    currentChinemaCollider = transfer.gameObject.GetComponent<TransferMap>().targetPoint.transform.parent.gameObject.transform.Find("CMRange_" + currentMapName).gameObject.GetComponent<Collider2D>();
-                    chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
-                }
+                gameManager.targetMapName = transfer.gameObject.GetComponent<ObjectData>().targetPoint.parent.parent.name;  //이동할 맵 표시
+                if (Input.GetKeyDown(KeyCode.DownArrow)) gameManager.Action(transfer); //맵 이동
             }
-
             //사운드
             if (isMove)
             {
-                if (!theAudio.IsPlaying(walkSound) && isGround && timeCheck)
+                if (!audioManager.IsPlaying(walkSound) && isGround && timeCheck)
                 {
                     timeCheck = false;
-                    theAudio.Play(walkSound);
-                    StartCoroutine("CountTime", 0.5f);
+                    audioManager.Play(walkSound);
+                    StartCoroutine("CountTimeCoroutine", 0.5f);
                 }
             }
-            else theAudio.Stop(walkSound);
+            else audioManager.Stop(walkSound);
             //npc 대화
             if (isNpcTrigger)
             {
-                if (!theNpc.IsTalk(npcName) && Input.GetKeyDown(KeyCode.Space))
-                {
-                    theNpc.Talk(npcNum, talkIndex);
-                }
-
-                else if (theNpc.IsTalk(npcName) && Input.GetKeyDown(KeyCode.Space))
-                {
-                    theNpc.TalkCancel(npcName);
-                }
+                if (Input.GetKeyDown(KeyCode.Space)) gameManager.Action(scanObj);
             }
         }
-        //IsMine이 아닌 것들
+        /*IsMine이 아닌 것들*/
         //움직임
         else if ((transform.position - curPos).sqrMagnitude >= 100) transform.position = curPos;
         else transform.position = Vector3.Lerp(this.gameObject.transform.position, curPos, Time.deltaTime * 10);
@@ -190,25 +157,22 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     void Jump()
     {
         isJump = true;
-        if (PV.IsMine)
-        {
-            //↑ 레이어 위로통과
-            StopAllCoroutines();
-            StartCoroutine("PassUpGround");
-        }
+        //↑ 레이어 위로통과
+        if (PV.IsMine) StartCoroutine("PassUpGroundCoroutine");
     }
 
     void FixedUpdate()
     {
         //← → 이동
         rigid.velocity = new Vector2(speed * axis, rigid.velocity.y);
+
+        //↑점프 OR ↑↑ 더블 점프
         if (isJump)
         {
             rigid.velocity = Vector2.zero;
             rigid.AddForce(Vector2.up * jumpForce);
             isJump = false;
         }
-
     }
 
     [PunRPC]    //좌우반전
@@ -225,18 +189,16 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         anim.SetBool(param, isRuning);
     }
     [PunRPC]    //점프
-    void jumpRPC()
-    {
-        Jump();
-    }
+    void jumpRPC() => Jump();
+
     [PunRPC]    //사운드
     void soundRPC(string _soundName)
     {
-        theAudio.Play(_soundName);
+        audioManager.Play(_soundName);
     }
 
     //↓ 레이어 아래로통과 코루틴
-    IEnumerator PassDownGround(float curY)
+    IEnumerator PassDownGroundCoroutine(float curY)
     {
         Physics2D.IgnoreLayerCollision(passPlayerLayer, passGroundLayer, true);
         gameObject.layer = passPlayerLayer;
@@ -245,61 +207,61 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         gameObject.layer = playerLayer;
     }
     //↑ 레이어 위로통과 코루틴
-    IEnumerator PassUpGround()
+    IEnumerator PassUpGroundCoroutine()
     {
         Physics2D.IgnoreLayerCollision(passPlayerLayer, passGroundLayer, true);
         gameObject.layer = passPlayerLayer;
-        yield return new WaitUntil(() => (rigid.velocity.y < 0 && !isGround));
+        //if(rigid.velocity.y > )
+        yield return new WaitUntil(() => (rigid.velocity.y > 0));
+        yield return new WaitUntil(() => (isGround && rigid.velocity.y < 0));
         Physics2D.IgnoreLayerCollision(passPlayerLayer, passGroundLayer, false);
         gameObject.layer = playerLayer;
     }
 
     //워크카운터 코루틴
-    IEnumerator CountTime(float delayTime)
+    IEnumerator CountTimeCoroutine(float delayTime)
     {
         yield return new WaitForSeconds(delayTime);
         timeCheck = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D col)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         //대화창 온 트리거
-        if (col.gameObject.tag == "NPC")
+        if (collision.gameObject.tag == "NPC")
         {
-            npcName = col.gameObject.name;
-            npcNum = col.gameObject.GetComponent<ObjectData>().id;
+            scanObj = collision.gameObject;
             isNpcTrigger = true;
         }
         //맵이동 온 트리거
-        else if (col.gameObject.tag == "Transfer")
+        else if (collision.gameObject.tag == "Transfer")
         {
-            transfer = col.gameObject;
+            transfer = collision.gameObject;
             isInTransferObj = true;
         }
         //처음 맵 확인용
-        else if (col.gameObject.tag == "MapRange")
+        else if (!spawnCheck && collision.gameObject.tag == "MapRange")
         {
-            currentMapName = col.gameObject.transform.parent.name;
-            currentChinemaCollider = col.gameObject.GetComponent<PolygonCollider2D>();
-            chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
+            if(gameManager == null) gameManager = FindObjectOfType<GameManager>();
+            gameManager.SetMapField(collision.gameObject.transform.parent.gameObject.name, collision.gameObject.GetComponent<PolygonCollider2D>());
+            spawnCheck = true;
         }
     }
 
-    private void OnTriggerExit2D(Collider2D col)
+    private void OnTriggerExit2D(Collider2D collision)
     {
         //대화창 오프 트리거
-        if (col.gameObject.tag == "NPC")
+        if (collision.gameObject.tag == "NPC")
         {
-            npcName = "";
-            npcNum = -1;
+            scanObj = null;
             isNpcTrigger = false;
         }
         //맵이동 오프 트리거
-        else if (col.gameObject.tag == "Transfer")
+        else if (collision.gameObject.tag == "Transfer")
         {
             transfer = null;
             isInTransferObj = false;
-            targetMapName = "";
+            gameManager.targetMapName = "";
         }
     }
 

@@ -250,6 +250,35 @@ namespace PlayFab.ServerModels
         public List<AwardSteamAchievementItem> AchievementResults;
     }
 
+    [Serializable]
+    public class AzureResourceSystemData : PlayFabBaseModel
+    {
+        /// <summary>
+        /// The timestamp of resource creation (UTC)
+        /// </summary>
+        public DateTime? CreatedAt;
+        /// <summary>
+        /// The identity that created the resource
+        /// </summary>
+        public string CreatedBy;
+        /// <summary>
+        /// The type of identity that created the resource
+        /// </summary>
+        public string CreatedByType;
+        /// <summary>
+        /// The type of identity that last modified the resource
+        /// </summary>
+        public DateTime? LastModifiedAt;
+        /// <summary>
+        /// The identity that last modified the resource
+        /// </summary>
+        public string LastModifiedBy;
+        /// <summary>
+        /// The type of identity that last modified the resource
+        /// </summary>
+        public string LastModifiedByType;
+    }
+
     /// <summary>
     /// Contains information for a ban.
     /// </summary>
@@ -276,10 +305,6 @@ namespace PlayFab.ServerModels
         /// The IP address on which the ban was applied. May affect multiple players.
         /// </summary>
         public string IPAddress;
-        /// <summary>
-        /// The MAC address on which the ban was applied. May affect multiple players.
-        /// </summary>
-        public string MACAddress;
         /// <summary>
         /// Unique PlayFab assigned ID of the user on whom the operation will be performed.
         /// </summary>
@@ -1949,8 +1974,20 @@ namespace PlayFab.ServerModels
         ApiNotEnabledForTitle,
         DuplicateTitleNameForPublisher,
         AzureTitleCreationInProgress,
-        DuplicateAzureResourceId,
-        TitleContraintsPublisherDeletion,
+        TitleConstraintsPublisherDeletion,
+        InvalidPlayerAccountPoolId,
+        PlayerAccountPoolNotFound,
+        PlayerAccountPoolDeleted,
+        TitleCleanupInProgress,
+        AzureResourceConcurrentOperationInProgress,
+        TitlePublisherUpdateNotAllowed,
+        AzureResourceManagerNotSupportedInStamp,
+        ApiNotIncludedInAzurePlayFabFeatureSet,
+        GoogleServiceAccountFailedAuth,
+        GoogleAPIServiceUnavailable,
+        GoogleAPIServiceUnknownError,
+        NoValidIdentityForAad,
+        PlayerIdentityLinkNotFound,
         MatchmakingEntityInvalid,
         MatchmakingPlayerAttributesInvalid,
         MatchmakingQueueNotFound,
@@ -1974,6 +2011,9 @@ namespace PlayFab.ServerModels
         MatchmakingBadRequest,
         PubSubFeatureNotEnabledForTitle,
         PubSubTooManyRequests,
+        PubSubConnectionNotFoundForEntity,
+        PubSubConnectionHandleInvalid,
+        PubSubSubscriptionLimitExceeded,
         TitleConfigNotFound,
         TitleConfigUpdateConflict,
         TitleConfigSerializationError,
@@ -2091,7 +2131,13 @@ namespace PlayFab.ServerModels
         EventSamplingInvalidRatio,
         EventSamplingInvalidEventNamespace,
         EventSamplingInvalidEventName,
-        EventSamplingRatioNotFound
+        EventSamplingRatioNotFound,
+        EventSinkConnectionInvalid,
+        EventSinkConnectionUnauthorized,
+        EventSinkRegionInvalid,
+        OperationCanceled,
+        InvalidDisplayNameRandomSuffixLength,
+        AllowNonUniquePlayerDisplayNamesDisableNotAllowed
     }
 
     [Serializable]
@@ -5632,10 +5678,19 @@ namespace PlayFab.ServerModels
     public class SetTitleDataRequest : PlayFabRequestCommon
     {
         /// <summary>
+        /// The optional custom tags associated with the request (e.g. build number, external trace identifiers, etc.).
+        /// </summary>
+        public Dictionary<string,string> CustomTags;
+        /// <summary>
         /// key we want to set a value on (note, this is additive - will only replace an existing key's value if they are the same
         /// name.) Keys are trimmed of whitespace. Keys may not begin with the '!' character.
         /// </summary>
         public string Key;
+        /// <summary>
+        /// Unique identifier for the title, found in the Settings > Game Properties section of the PlayFab developer site when a
+        /// title has been selected.
+        /// </summary>
+        public string TitleId;
         /// <summary>
         /// new value to set. Set to null to remove a value
         /// </summary>

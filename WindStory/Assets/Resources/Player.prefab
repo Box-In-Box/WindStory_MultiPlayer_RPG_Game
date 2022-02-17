@@ -425,26 +425,23 @@ MonoBehaviour:
   rigid: {fileID: 8740833075160548507}
   anim: {fileID: 8044692396672922074}
   PV: {fileID: 6203851538869258052}
-  theTransfer: {fileID: 0}
-  groundCheckCollider: {fileID: 4471674393466432145}
+  gameManager: {fileID: 0}
+  objectData: {fileID: 0}
   speed: 3
   jumpForce: 400
-  checkGroundDistance: 0.3
+  checkGroundDistance: 0.1
+  spawnCheck: 0
   isFacingRight: 1
   isGround: 0
   isUpGround: 0
   doubleJumpState: 0
   isMove: 0
+  isJump: 0
+  canDoubleJump: 1
   walkSound: Walk
-  timeCheck: 1
-  currentChinemaCollider: {fileID: 0}
-  transfer: {fileID: 0}
-  currentMapName: 
-  targetMapName: 
   isInTransferObj: 0
-  npcName: 
-  npcNum: 0
-  talkIndex: 0
+  transfer: {fileID: 0}
+  scanObj: {fileID: 0}
   isNpcTrigger: 0
 --- !u!82 &5477647950941908820
 AudioSource:
@@ -576,8 +573,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.25}
-  m_Size: {x: 0.5, y: 0.5}
+  m_Offset: {x: 0, y: 0.15}
+  m_Size: {x: 0.3, y: 0.3}
   m_Direction: 0
 --- !u!1001 &8044692396144690086
 PrefabInstance:

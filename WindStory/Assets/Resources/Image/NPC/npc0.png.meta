@@ -199,9 +199,9 @@ TextureImporter:
       name: npc1_0
       rect:
         serializedVersion: 2
-        x: 462
+        x: 463
         y: 0
-        width: 49
+        width: 48
         height: 104
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -283,9 +283,9 @@ TextureImporter:
       name: npc1_1
       rect:
         serializedVersion: 2
-        x: 511
+        x: 513
         y: 0
-        width: 49
+        width: 48
         height: 104
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -304,9 +304,9 @@ TextureImporter:
       name: npc1_2
       rect:
         serializedVersion: 2
-        x: 560
+        x: 563
         y: 0
-        width: 49
+        width: 48
         height: 104
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -325,9 +325,9 @@ TextureImporter:
       name: npc1_3
       rect:
         serializedVersion: 2
-        x: 609
+        x: 613
         y: 0
-        width: 49
+        width: 48
         height: 104
       alignment: 0
       pivot: {x: 0.5, y: 0.5}

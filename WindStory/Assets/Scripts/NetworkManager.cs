@@ -6,7 +6,6 @@ using Photon.Realtime;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {

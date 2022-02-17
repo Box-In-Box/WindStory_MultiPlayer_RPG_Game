@@ -365,6 +365,35 @@ namespace PlayFab.AdminModels
         Email
     }
 
+    [Serializable]
+    public class AzureResourceSystemData : PlayFabBaseModel
+    {
+        /// <summary>
+        /// The timestamp of resource creation (UTC)
+        /// </summary>
+        public DateTime? CreatedAt;
+        /// <summary>
+        /// The identity that created the resource
+        /// </summary>
+        public string CreatedBy;
+        /// <summary>
+        /// The type of identity that created the resource
+        /// </summary>
+        public string CreatedByType;
+        /// <summary>
+        /// The type of identity that last modified the resource
+        /// </summary>
+        public DateTime? LastModifiedAt;
+        /// <summary>
+        /// The identity that last modified the resource
+        /// </summary>
+        public string LastModifiedBy;
+        /// <summary>
+        /// The type of identity that last modified the resource
+        /// </summary>
+        public string LastModifiedByType;
+    }
+
     /// <summary>
     /// Contains information for a ban.
     /// </summary>
@@ -391,10 +420,6 @@ namespace PlayFab.AdminModels
         /// The IP address on which the ban was applied. May affect multiple players.
         /// </summary>
         public string IPAddress;
-        /// <summary>
-        /// The MAC address on which the ban was applied. May affect multiple players.
-        /// </summary>
-        public string MACAddress;
         /// <summary>
         /// Unique PlayFab assigned ID of the user on whom the operation will be performed.
         /// </summary>
@@ -656,6 +681,14 @@ namespace PlayFab.AdminModels
         /// The amount of the specified resource remaining.
         /// </summary>
         public int Amount;
+    }
+
+    public enum ChurnRiskLevel
+    {
+        NoData,
+        LowRisk,
+        MediumRisk,
+        HighRisk
     }
 
     [Serializable]
@@ -2431,9 +2464,20 @@ namespace PlayFab.AdminModels
         ApiNotEnabledForTitle,
         DuplicateTitleNameForPublisher,
         AzureTitleCreationInProgress,
-        DuplicateAzureResourceId,
-        TitleContraintsPublisherDeletion,
+        TitleConstraintsPublisherDeletion,
         InvalidPlayerAccountPoolId,
+        PlayerAccountPoolNotFound,
+        PlayerAccountPoolDeleted,
+        TitleCleanupInProgress,
+        AzureResourceConcurrentOperationInProgress,
+        TitlePublisherUpdateNotAllowed,
+        AzureResourceManagerNotSupportedInStamp,
+        ApiNotIncludedInAzurePlayFabFeatureSet,
+        GoogleServiceAccountFailedAuth,
+        GoogleAPIServiceUnavailable,
+        GoogleAPIServiceUnknownError,
+        NoValidIdentityForAad,
+        PlayerIdentityLinkNotFound,
         MatchmakingEntityInvalid,
         MatchmakingPlayerAttributesInvalid,
         MatchmakingQueueNotFound,
@@ -2457,7 +2501,7 @@ namespace PlayFab.AdminModels
         MatchmakingBadRequest,
         PubSubFeatureNotEnabledForTitle,
         PubSubTooManyRequests,
-        PubSubConnectionHandleAccessDenied,
+        PubSubConnectionNotFoundForEntity,
         PubSubConnectionHandleInvalid,
         PubSubSubscriptionLimitExceeded,
         TitleConfigNotFound,
@@ -2581,7 +2625,9 @@ namespace PlayFab.AdminModels
         EventSinkConnectionInvalid,
         EventSinkConnectionUnauthorized,
         EventSinkRegionInvalid,
-        OperationCanceled
+        OperationCanceled,
+        InvalidDisplayNameRandomSuffixLength,
+        AllowNonUniquePlayerDisplayNamesDisableNotAllowed
     }
 
     [Serializable]
@@ -3534,7 +3580,8 @@ namespace PlayFab.AdminModels
     /// <summary>
     /// All items currently in the user inventory will be returned, irrespective of how they were acquired (via purchasing,
     /// grants, coupons, etc.). Items that are expired, fully consumed, or are no longer valid are not considered to be in the
-    /// user's current inventory, and so will not be not included.
+    /// user's current inventory, and so will not be not included. There can be a delay of up to a half a second for inventory
+    /// changes to be reflected in the GetUserInventory API response.
     /// </summary>
     [Serializable]
     public class GetUserInventoryRequest : PlayFabRequestCommon
@@ -4385,6 +4432,45 @@ namespace PlayFab.AdminModels
         /// 'pfrn:api--/Client/ConfirmPurchase' for specific apis.
         /// </summary>
         public string Resource;
+    }
+
+    [Serializable]
+    public class PlayerChurnPredictionSegmentFilter : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Comparison
+        /// </summary>
+        public SegmentFilterComparison? Comparison;
+        /// <summary>
+        /// RiskLevel
+        /// </summary>
+        public ChurnRiskLevel? RiskLevel;
+    }
+
+    [Serializable]
+    public class PlayerChurnPredictionTimeSegmentFilter : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Comparison
+        /// </summary>
+        public SegmentFilterComparison? Comparison;
+        /// <summary>
+        /// DurationInDays
+        /// </summary>
+        public double DurationInDays;
+    }
+
+    [Serializable]
+    public class PlayerChurnPreviousPredictionSegmentFilter : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Comparison
+        /// </summary>
+        public SegmentFilterComparison? Comparison;
+        /// <summary>
+        /// RiskLevel
+        /// </summary>
+        public ChurnRiskLevel? RiskLevel;
     }
 
     [Serializable]
@@ -5335,6 +5421,18 @@ namespace PlayFab.AdminModels
         /// </summary>
         public LocationSegmentFilter LocationFilter;
         /// <summary>
+        /// Filter property for current player churn value.
+        /// </summary>
+        public PlayerChurnPredictionSegmentFilter PlayerChurnPredictionFilter;
+        /// <summary>
+        /// Filter property for player churn timespan.
+        /// </summary>
+        public PlayerChurnPredictionTimeSegmentFilter PlayerChurnPredictionTimeFilter;
+        /// <summary>
+        /// Filter property for previous player churn value.
+        /// </summary>
+        public PlayerChurnPreviousPredictionSegmentFilter PlayerChurnPreviousPredictionFilter;
+        /// <summary>
         /// Filter property for push notification.
         /// </summary>
         public PushNotificationSegmentFilter PushNotificationFilter;
@@ -5825,10 +5923,6 @@ namespace PlayFab.AdminModels
     public class SegmentModel : PlayFabBaseModel
     {
         /// <summary>
-        /// ResourceId of Segment resource
-        /// </summary>
-        public string AzureResourceId;
-        /// <summary>
         /// Segment description.
         /// </summary>
         public string Description;
@@ -6082,10 +6176,6 @@ namespace PlayFab.AdminModels
     public class SetTitleDataRequest : PlayFabRequestCommon
     {
         /// <summary>
-        /// Id of azure resource
-        /// </summary>
-        public string AzureResourceId;
-        /// <summary>
         /// The optional custom tags associated with the request (e.g. build number, external trace identifiers, etc.).
         /// </summary>
         public Dictionary<string,string> CustomTags;
@@ -6108,10 +6198,6 @@ namespace PlayFab.AdminModels
     [Serializable]
     public class SetTitleDataResult : PlayFabResultCommon
     {
-        /// <summary>
-        /// Id of azure resource
-        /// </summary>
-        public string AzureResourceId;
     }
 
     /// <summary>

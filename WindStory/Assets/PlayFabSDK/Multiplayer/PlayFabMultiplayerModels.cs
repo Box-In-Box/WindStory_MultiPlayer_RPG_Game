@@ -219,6 +219,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public DynamicStandbySettings DynamicStandbySettings;
         /// <summary>
+        /// Whether the game assets provided for the build have been replicated to this region.
+        /// </summary>
+        public bool IsAssetReplicationComplete;
+        /// <summary>
         /// The maximum number of multiplayer servers for the region.
         /// </summary>
         public int MaxServers;
@@ -609,6 +613,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public Dictionary<string,string> Metadata;
         /// <summary>
+        /// The configuration for the monitoring application on the build
+        /// </summary>
+        public MonitoringApplicationConfigurationParams MonitoringApplicationConfiguration;
+        /// <summary>
         /// The number of multiplayer servers to host on a single VM.
         /// </summary>
         public int MultiplayerServerCountPerVm;
@@ -679,6 +687,10 @@ namespace PlayFab.MultiplayerModels
         /// The metadata of the build.
         /// </summary>
         public Dictionary<string,string> Metadata;
+        /// <summary>
+        /// The configuration for the monitoring application for the build
+        /// </summary>
+        public MonitoringApplicationConfiguration MonitoringApplicationConfiguration;
         /// <summary>
         /// The number of multiplayer servers to host on a single VM of the build.
         /// </summary>
@@ -756,6 +768,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public Dictionary<string,string> Metadata;
         /// <summary>
+        /// The configuration for the monitoring application on the build
+        /// </summary>
+        public MonitoringApplicationConfigurationParams MonitoringApplicationConfiguration;
+        /// <summary>
         /// The number of multiplayer servers to host on a single VM.
         /// </summary>
         public int MultiplayerServerCountPerVm;
@@ -780,6 +796,10 @@ namespace PlayFab.MultiplayerModels
         /// The VM size to create the build on.
         /// </summary>
         public AzureVmSize? VmSize;
+        /// <summary>
+        /// The crash dump configuration for the build.
+        /// </summary>
+        public WindowsCrashDumpConfiguration WindowsCrashDumpConfiguration;
     }
 
     [Serializable]
@@ -827,6 +847,10 @@ namespace PlayFab.MultiplayerModels
         /// The metadata of the build.
         /// </summary>
         public Dictionary<string,string> Metadata;
+        /// <summary>
+        /// The configuration for the monitoring application for the build
+        /// </summary>
+        public MonitoringApplicationConfiguration MonitoringApplicationConfiguration;
         /// <summary>
         /// The number of multiplayer servers to host on a single VM of the build.
         /// </summary>
@@ -910,6 +934,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public Dictionary<string,string> Metadata;
         /// <summary>
+        /// The configuration for the monitoring application on the build
+        /// </summary>
+        public MonitoringApplicationConfigurationParams MonitoringApplicationConfiguration;
+        /// <summary>
         /// The number of multiplayer servers to host on a single VM.
         /// </summary>
         public int MultiplayerServerCountPerVm;
@@ -991,6 +1019,10 @@ namespace PlayFab.MultiplayerModels
         /// The metadata of the build.
         /// </summary>
         public Dictionary<string,string> Metadata;
+        /// <summary>
+        /// The configuration for the monitoring application for the build
+        /// </summary>
+        public MonitoringApplicationConfiguration MonitoringApplicationConfiguration;
         /// <summary>
         /// The number of multiplayer servers to host on a single VM of the build.
         /// </summary>
@@ -1765,6 +1797,7 @@ namespace PlayFab.MultiplayerModels
         /// When true, assets will be downloaded and uncompressed in memory, without the compressedversion being written first to
         /// disc.
         /// </summary>
+        [Obsolete("No longer available", false)]
         public bool? UseStreamingForAssetDownloads;
         /// <summary>
         /// The VM size the build was created on.
@@ -3066,6 +3099,48 @@ namespace PlayFab.MultiplayerModels
     }
 
     [Serializable]
+    public class MonitoringApplicationConfiguration : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Asset which contains the monitoring application files and scripts.
+        /// </summary>
+        public AssetReference AssetReference;
+        /// <summary>
+        /// Execution script name, this will be the main executable for the monitoring application.
+        /// </summary>
+        public string ExecutionScriptName;
+        /// <summary>
+        /// Installation script name, this will be run before the ExecutionScript.
+        /// </summary>
+        public string InstallationScriptName;
+        /// <summary>
+        /// Timespan the monitoring application will be kept alive when running from the start of the VM
+        /// </summary>
+        public double? OnStartRuntimeInMinutes;
+    }
+
+    [Serializable]
+    public class MonitoringApplicationConfigurationParams : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Asset which contains the monitoring application files and scripts.
+        /// </summary>
+        public AssetReferenceParams AssetReference;
+        /// <summary>
+        /// Execution script name, this will be the main executable for the monitoring application.
+        /// </summary>
+        public string ExecutionScriptName;
+        /// <summary>
+        /// Installation script name, this will be run before the ExecutionScript.
+        /// </summary>
+        public string InstallationScriptName;
+        /// <summary>
+        /// Timespan the monitoring application will be kept alive when running from the start of the VM
+        /// </summary>
+        public double? OnStartRuntimeInMinutes;
+    }
+
+    [Serializable]
     public class MultiplayerServerSummary : PlayFabBaseModel
     {
         /// <summary>
@@ -3848,6 +3923,23 @@ namespace PlayFab.MultiplayerModels
         /// The virtual machine ID.
         /// </summary>
         public string VmId;
+    }
+
+    [Serializable]
+    public class WindowsCrashDumpConfiguration : PlayFabBaseModel
+    {
+        /// <summary>
+        /// See https://docs.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps for valid values.
+        /// </summary>
+        public int? CustomDumpFlags;
+        /// <summary>
+        /// See https://docs.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps for valid values.
+        /// </summary>
+        public int? DumpType;
+        /// <summary>
+        /// Designates whether automatic crash dump capturing will be enabled for this Build.
+        /// </summary>
+        public bool IsEnabled;
     }
 }
 #endif

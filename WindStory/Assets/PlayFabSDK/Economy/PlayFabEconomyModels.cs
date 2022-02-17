@@ -341,6 +341,10 @@ namespace PlayFab.EconomyModels
         /// </summary>
         public EntityKey Entity;
         /// <summary>
+        /// Whether to fetch metadata of the scan status.
+        /// </summary>
+        public bool? ExpandScanningStatus;
+        /// <summary>
         /// The unique ID of the item.
         /// </summary>
         public string Id;
@@ -629,6 +633,36 @@ namespace PlayFab.EconomyModels
         /// The total number of reviews associated with this item.
         /// </summary>
         public int ReviewsCount;
+    }
+
+    [Serializable]
+    public class GetItemsRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// List of item alternate IDs.
+        /// </summary>
+        public List<CatalogAlternateId> AlternateIds;
+        /// <summary>
+        /// The optional custom tags associated with the request (e.g. build number, external trace identifiers, etc.).
+        /// </summary>
+        public Dictionary<string,string> CustomTags;
+        /// <summary>
+        /// The entity to perform this action on.
+        /// </summary>
+        public EntityKey Entity;
+        /// <summary>
+        /// List of Item Ids.
+        /// </summary>
+        public List<string> Ids;
+    }
+
+    [Serializable]
+    public class GetItemsResponse : PlayFabResultCommon
+    {
+        /// <summary>
+        /// Metadata of set of items.
+        /// </summary>
+        public List<CatalogItem> Items;
     }
 
     public enum HelpfulnessVote
