@@ -45,6 +45,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [Header("---ETC---")]
     public GameObject scanObj;
     public bool isNpcTrigger;
+    public float PreviouslandPositionY;
 
     private AudioManager audioManager;
 
@@ -65,6 +66,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             Physics2D.IgnoreLayerCollision(playerLayer, passPlayerLayer, true);
             Physics2D.IgnoreLayerCollision(playerLayer, passPlayerLayer, true);
         }
+        else
+        {
+            gameObject.GetComponent<CapsuleCollider2D>().isTrigger = true;
+            gameObject.GetComponent<Rigidbody2D>().simulated = false;
+        }
+            
         //닉네임
         transform.Find("Canvas").gameObject.transform.Find("NickNameText").gameObject.GetComponent<Text>().text = PV.IsMine ? PhotonNetwork.LocalPlayer.NickName : PV.Owner.NickName;
     }
@@ -73,8 +80,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         audioManager = FindObjectOfType<AudioManager>();
         gameManager = FindObjectOfType<GameManager>();
-        //게임메니저 셋팅
-        if (PV.IsMine) gameManager.Setting(gameObject);
+        if (PV.IsMine)
+        {
+            //게임메니저 셋팅
+            gameManager.Setting(gameObject);
+            //초기값 셋팅
+            PreviouslandPositionY = transform.position.y;
+        }
     }
 
     void Update()
@@ -104,7 +116,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             isGround = Physics2D.OverlapCircle((Vector2)transform.position, checkGroundDistance, LayerMask.GetMask("Ground"));
             isUpGround = Physics2D.OverlapCircle((Vector2)transform.position, checkGroundDistance, LayerMask.GetMask("PassGround"));
             if (isUpGround) isGround = true;
-            if (isGround) doubleJumpState = true;
+            if (isGround)
+            {
+                doubleJumpState = true;
+            } 
+                
             Debug.DrawRay(transform.position, Vector2.down * checkGroundDistance, Color.green);
         
             //점프 anim
@@ -121,8 +137,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             }
 
             //↓ 레이어 아래로통과
-            if (isUpGround && Input.GetKeyDown(KeyCode.DownArrow))
+            if (isUpGround && Input.GetKeyDown(KeyCode.DownArrow) && !isInTransferObj)
             {
+                audioManager.Play("Jump");
                 StartCoroutine("PassDownGroundCoroutine", transform.position.y);
             }
             //↓ 맵이동
@@ -147,31 +164,49 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             {
                 if (Input.GetKeyDown(KeyCode.Space)) gameManager.Action(scanObj);
             }
+            PreviouslandPositionY = transform.position.y > PreviouslandPositionY ? transform.position.y : PreviouslandPositionY;
         }
-        /*IsMine이 아닌 것들*/
-        //움직임
-        else if ((transform.position - curPos).sqrMagnitude >= 100) transform.position = curPos;
-        else transform.position = Vector3.Lerp(this.gameObject.transform.position, curPos, Time.deltaTime * 10);
     }
 
     void Jump()
     {
         isJump = true;
+        audioManager.Play("Jump");
         //↑ 레이어 위로통과
         if (PV.IsMine) StartCoroutine("PassUpGroundCoroutine");
     }
 
+    void land()
+    {
+        //점프했을 때 최고 위치 - 내려와 땅에 닿았을 때 위치 가 0.3이상이면 랜드이펙트 발생
+        if(PreviouslandPositionY - transform.position.y > 0.3f)
+        {
+            audioManager.Play("Land");
+            GameObject effect = PhotonNetwork.Instantiate("lendingEffect", transform.position, Quaternion.identity);
+            effect.transform.SetParent(GameObject.Find("Effect").transform);
+        }
+    }
+
     void FixedUpdate()
     {
-        //← → 이동
-        rigid.velocity = new Vector2(speed * axis, rigid.velocity.y);
-
-        //↑점프 OR ↑↑ 더블 점프
-        if (isJump)
+        if(PV.IsMine)
         {
-            rigid.velocity = Vector2.zero;
-            rigid.AddForce(Vector2.up * jumpForce);
-            isJump = false;
+            //← → 이동
+            rigid.velocity = new Vector2(speed * axis, rigid.velocity.y);
+
+            //↑점프 OR ↑↑ 더블 점프
+            if (isJump)
+            {
+                rigid.velocity = Vector2.zero;
+                rigid.AddForce(Vector2.up * jumpForce);
+                isJump = false;
+            }
+        }
+        //리모트 플레이어
+        else
+        {
+            if ((transform.position - curPos).sqrMagnitude >= 100) transform.position = curPos;
+            transform.position = Vector3.Lerp(this.gameObject.transform.position, curPos, Time.deltaTime * 10);
         }
     }
 
@@ -213,7 +248,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         gameObject.layer = passPlayerLayer;
         //if(rigid.velocity.y > )
         yield return new WaitUntil(() => (rigid.velocity.y > 0));
-        yield return new WaitUntil(() => (isGround && rigid.velocity.y < 0));
+        yield return new WaitUntil(() => (rigid.velocity.y < 0));
         Physics2D.IgnoreLayerCollision(passPlayerLayer, passGroundLayer, false);
         gameObject.layer = playerLayer;
     }
@@ -223,6 +258,34 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         yield return new WaitForSeconds(delayTime);
         timeCheck = true;
+    }
+
+    IEnumerator WaitTimeCoroutine(float delayTime)
+    {
+        rigid.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
+        yield return new WaitForSeconds(delayTime);
+        rigid.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //landEffect
+        if (collision.gameObject.tag == "Ground")
+        {
+            land();
+            PreviouslandPositionY = transform.position.y;
+        }
+        if (collision.gameObject.tag == "BorderLine")
+        {
+            land();
+            PreviouslandPositionY = transform.position.y;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        //landEffect 크로스(내리막, 바닥) 되는 부분 수정값
+        if (collision.gameObject.tag == "Ground") PreviouslandPositionY = transform.position.y;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

@@ -251,6 +251,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clips:
   - {fileID: 8300000, guid: 63d01eae60f2ae64fb4b9bff8f9e53cb, type: 3}
+  - {fileID: 8300000, guid: c46947148bf3b5c43b13109c679b2ebb, type: 3}
   settingVolumn: []
 --- !u!4 &23069924
 Transform:
@@ -3741,6 +3742,14 @@ MonoBehaviour:
     loop: 0
   - soundName: Walk
     clip: {fileID: 8300000, guid: e86724e8af9d4174695c0c742dedd307, type: 3}
+    volume: 0.6
+    loop: 0
+  - soundName: Jump
+    clip: {fileID: 8300000, guid: d188777a48817a64c816bdcc1ab21549, type: 3}
+    volume: 0.3
+    loop: 0
+  - soundName: Land
+    clip: {fileID: 8300000, guid: 6ca2c80e0011483419440796ed3758db, type: 3}
     volume: 0.3
     loop: 0
 --- !u!4 &1050724325
@@ -7353,7 +7362,8 @@ MonoBehaviour:
   ConnectGame: {fileID: 159603715}
   currentWorld: -1
   currentChannel: -1
-  theAudio: {fileID: 1050724324}
+  AudioManager: {fileID: 1050724324}
+  bgmManager: {fileID: 23069923}
 --- !u!4 &1990006256
 Transform:
   m_ObjectHideFlags: 0

@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class ObjectData : MonoBehaviour
 {
-    //0~999 : object 
     /*
-     * transfer - 0
+     * transfer : 0 ~ 999
+     * Npc : 1000 ~ 2999
+     * Monster : 3000 ~ 4999
      */
-    //1000 ~ 2000 : npc
+
+    [Header("---ID---")]
     public int id;
+
+    [Header("---Type---")]
     public bool isNpc;
     public bool isTransfer;
+    public bool isMonster;
 
-    private void Start()
-    {
-        if (id >= 0 && id < 100) isTransfer = true;
-        else if (id >= 1000 && id < 2000) isNpc = true;
-    }
-
+    [Header("---Transfer---")]
     public Transform targetPoint;
     public Transform startPoint;
 }

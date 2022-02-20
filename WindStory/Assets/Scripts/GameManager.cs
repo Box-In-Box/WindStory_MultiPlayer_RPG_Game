@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [Header("---Setting---")]
     public GameObject LocalPlayer;
+    public BGMManager bgmManager;
     public NpcManager npcManager;
     public TalkManager talkManager;
     public TypingEffect typingEffect;
@@ -38,6 +39,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     public static CinemachineVirtualCamera chinemaCamera;
     public static CinemachineConfiner chinemaConfiner;
 
+    [Header("---Monster---")]
+    public GameObject[] spawnPoint;
+
     private void Awake()
     {
         if (instance == null) { DontDestroyOnLoad(gameObject); instance = this; }
@@ -45,6 +49,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         
         chinemaConfiner = FindObjectOfType<CinemachineConfiner>();
+
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Monster"), LayerMask.NameToLayer("Monster"), true);
     }
 
     public void Setting(GameObject _LocalPlayer)
@@ -56,6 +62,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         chinemaConfiner = FindObjectOfType<CinemachineConfiner>();
         chinemaCamera.Follow = LocalPlayer.transform;
         chinemaCamera.LookAt = LocalPlayer.transform;
+        bgmManager = FindObjectOfType<BGMManager>();
+        bgmManager.Play(1);
     }
 
     public void SetMapField(string _currentMapName, Collider2D _currentChinemaCollider)
@@ -98,6 +106,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             else if (isTalking) Talk(id);
         }
 
+        //맵이동
         if(isTransfer)
         {
             //플레이어, 카메라 설정
@@ -105,6 +114,12 @@ public class GameManager : MonoBehaviourPunCallbacks
             LocalPlayer.transform.position = scanObj.gameObject.GetComponent<ObjectData>().targetPoint.transform.position;
             currentChinemaCollider = scanObj.gameObject.GetComponent<ObjectData>().targetPoint.transform.parent.parent.gameObject.transform.Find("CMRange_" + currentMapName).gameObject.GetComponent<Collider2D>();
             chinemaConfiner.m_BoundingShape2D = currentChinemaCollider;
+
+            //몬스터 필드일경우
+            if(currentMapName == "MapA_1")
+            {
+                spawnMonster(currentMapName);
+            }
         }
     }
 
@@ -126,5 +141,33 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         isTalking = true;
         TalkIndex++;
+    }
+
+    public void spawnMonster(string _MapName)
+    {
+        GameObject spawnPointObject = GameObject.Find(_MapName).gameObject.transform.Find("MonsterSpawnField").gameObject;
+        GameObject Monsters = GameObject.Find("Monsters").gameObject;
+        spawnPoint = new GameObject[spawnPointObject.transform.childCount];
+        BoxCollider2D spawnCollider;
+        Vector2 originPosition;
+        Vector2 randomPosition;
+        Vector2 respawnPosition;
+
+        for (int i = 0; i < spawnPointObject.transform.childCount; i++)
+        {
+            spawnPoint[i] = spawnPointObject.transform.GetChild(i).gameObject;
+            spawnCollider = spawnPoint[i].GetComponent<BoxCollider2D>();
+
+            originPosition = spawnPoint[i].transform.position;
+
+            float spawnPosition_x = spawnCollider.bounds.size.x;
+            float spawnPosition_y = spawnCollider.bounds.size.y / 2 * -1;
+            spawnPosition_x = Random.Range((spawnPosition_x / 2) * -1, (spawnPosition_x / 2));
+
+            randomPosition = new Vector2(spawnPosition_x, spawnPosition_y);
+            respawnPosition = originPosition + randomPosition;
+            GameObject monster = PhotonNetwork.Instantiate("Monster0", respawnPosition, Quaternion.identity);
+            monster.transform.SetParent(Monsters.transform);
+        }
     }
 }

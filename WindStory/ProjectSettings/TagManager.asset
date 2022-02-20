@@ -8,6 +8,9 @@ TagManager:
   - NPC
   - Transfer
   - MapRange
+  - BorderLine
+  - Monster
+  - MonsterSpawnPoint
   layers:
   - Default
   - TransparentFX
@@ -29,7 +32,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Monster
   - 
   - 
   - 

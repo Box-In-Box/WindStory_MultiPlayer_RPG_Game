@@ -24,7 +24,8 @@ public class RobbyManager : MonoBehaviour
 
     [Header("---ETC---")]
     EventSystem system;
-    public AudioManager theAudio;
+    public AudioManager AudioManager;
+    public BGMManager bgmManager;
 
     void Start()
     {
@@ -32,7 +33,6 @@ public class RobbyManager : MonoBehaviour
         RobbyPanel.SetActive(false);
 
         system = EventSystem.current;
-        theAudio = FindObjectOfType<AudioManager>();
     }
 
     public void Login()
@@ -107,6 +107,7 @@ public class RobbyManager : MonoBehaviour
 
     public void SelectCharacter()
     {
+        bgmManager.FadeOutMusic();
         SceneManager.LoadScene("InGame");
     }
 }

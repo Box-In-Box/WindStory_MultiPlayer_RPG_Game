@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 4500348034098785584}
   - component: {fileID: 4500348034098785590}
   - component: {fileID: 142832402834815311}
-  - component: {fileID: 4500348034098785589}
   m_Layer: 0
   m_Name: Transfer
   m_TagString: Transfer
@@ -145,17 +144,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   isNpc: 0
---- !u!114 &4500348034098785589
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4500348034098785586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82b06a1adfe868c438bb933674828cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  isTransfer: 1
   targetPoint: {fileID: 0}
-  startPoint: {fileID: 4500348034098785585}
+  startPoint: {fileID: 0}

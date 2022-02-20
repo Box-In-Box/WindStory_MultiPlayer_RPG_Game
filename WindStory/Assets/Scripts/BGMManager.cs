@@ -25,7 +25,7 @@ public class BGMManager : MonoBehaviour
         settingVolumn = new float[clips.Length];
         for (int i = 0; i < settingVolumn.Length; i++)
         {
-            if(settingVolumn[i] == 0) settingVolumn[i] = 0.1f;
+            if(settingVolumn[i] == 0) settingVolumn[i] = 0.05f;
         }
         Play(0);
     }
