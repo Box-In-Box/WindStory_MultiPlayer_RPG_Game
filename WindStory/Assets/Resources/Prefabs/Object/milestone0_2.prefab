@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 111749703298041947}
   - component: {fileID: 6204561901453718873}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: milestoneCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

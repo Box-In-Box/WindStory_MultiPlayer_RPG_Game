@@ -13,54 +13,57 @@ using Cinemachine;
  */
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
-    public Rigidbody2D rigid;
-    public Animator anim;
-    public PhotonView PV;
-    public GameManager gameManager;
-    public ObjectData objectData;
+    private Rigidbody2D rigid;
+    private Animator anim;
+    private PhotonView PV;
+    private GameManager gameManager;
 
     [Header ("---Setting---")]
     [SerializeField] [Range(1f, 10f)] float speed;
     [SerializeField] [Range(100f, 1000f)] float jumpForce;
     [SerializeField] [Range(0f, 1f)] float checkGroundDistance;
+    [SerializeField] public int level = 1;
+    [SerializeField] public int hp = 100;
+    [SerializeField] public int mp = 100;
+    [SerializeField] public int exp = 0;
 
     [Header("---Check---")]
-    public bool spawnCheck;
-    public bool isFacingRight;
-    public bool isGround;
-    public bool isUpGround;
-    public bool doubleJumpState;
-    public bool isMove;
-    public bool isJump;
     public bool canDoubleJump;
+    private bool spawnCheck;
+    private bool isFacingRight = true;
+    private bool isGround;
+    private bool isUpGround;
+    private bool doubleJumpState;
+    private bool isMove;
+    private bool isJump;
 
     [Header("---Sound---")]
     public string walkSound;
     private bool timeCheck = true;
 
-    [Header("---MAP---")]
-    public bool isInTransferObj;
-    public GameObject transfer;
-
     [Header("---ETC---")]
     public GameObject scanObj;
     public bool isNpcTrigger;
-    public float PreviouslandPositionY;
+    public bool isInTransferObj;
+    private float PreviouslandPositionY;
 
     private AudioManager audioManager;
 
     private float axis;
-    Vector3 curPos;
-    int playerLayer, passPlayerLayer, groundLayer, passGroundLayer;
+    int playerLayer, passPlayerLayer, passGroundLayer;
 
     void Awake()
     {
+        rigid = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        PV = GetComponent<PhotonView>();
+        gameManager = FindObjectOfType<GameManager>();
+
         if (PV.IsMine)
         {
             //레이어 통과
             playerLayer = LayerMask.NameToLayer("Player");
             passPlayerLayer = LayerMask.NameToLayer("PassPlayer");
-            groundLayer = LayerMask.NameToLayer("Ground");
             passGroundLayer = LayerMask.NameToLayer("PassGround"); 
             Physics2D.IgnoreLayerCollision(playerLayer, playerLayer, true);
             Physics2D.IgnoreLayerCollision(playerLayer, passPlayerLayer, true);
@@ -73,7 +76,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         }
             
         //닉네임
-        transform.Find("Canvas").gameObject.transform.Find("NickNameText").gameObject.GetComponent<Text>().text = PV.IsMine ? PhotonNetwork.LocalPlayer.NickName : PV.Owner.NickName;
+        transform.Find("PlayerCanvas").gameObject.transform.Find("NickNameText").gameObject.GetComponent<Text>().text = PV.IsMine ? PhotonNetwork.LocalPlayer.NickName : PV.Owner.NickName;
     }
 
     void Start()
@@ -145,8 +148,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             //↓ 맵이동
             if (isInTransferObj)
             {
-                gameManager.targetMapName = transfer.gameObject.GetComponent<ObjectData>().targetPoint.parent.parent.name;  //이동할 맵 표시
-                if (Input.GetKeyDown(KeyCode.DownArrow)) gameManager.Action(transfer); //맵 이동
+                gameManager.targetMapName = scanObj.gameObject.GetComponent<ObjectData>().targetPoint.parent.parent.name;  //이동할 맵 표시
+                if (Input.GetKeyDown(KeyCode.DownArrow)) gameManager.Action(scanObj); //맵 이동
             }
             //사운드
             if (isMove)
@@ -201,12 +204,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 rigid.AddForce(Vector2.up * jumpForce);
                 isJump = false;
             }
-        }
-        //리모트 플레이어
-        else
-        {
-            if ((transform.position - curPos).sqrMagnitude >= 100) transform.position = curPos;
-            transform.position = Vector3.Lerp(this.gameObject.transform.position, curPos, Time.deltaTime * 10);
         }
     }
 
@@ -299,7 +296,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         //맵이동 온 트리거
         else if (collision.gameObject.tag == "Transfer")
         {
-            transfer = collision.gameObject;
+            scanObj = collision.gameObject;
             isInTransferObj = true;
         }
         //처음 맵 확인용
@@ -322,7 +319,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         //맵이동 오프 트리거
         else if (collision.gameObject.tag == "Transfer")
         {
-            transfer = null;
+            scanObj = null;
             isInTransferObj = false;
             gameManager.targetMapName = "";
         }
@@ -332,11 +329,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(transform.position);
+            
         }
         else
         {
-            curPos = (Vector3)stream.ReceiveNext();
+            
         }
     }
 }

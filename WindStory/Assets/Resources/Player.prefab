@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7683154775933863622}
   - component: {fileID: 7259569840552233063}
   m_Layer: 7
-  m_Name: Canvas
+  m_Name: PlayerCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -101,36 +101,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!1 &2801185609991839659
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4471674393466432145}
-  m_Layer: 7
-  m_Name: GroundCheck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4471674393466432145
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2801185609991839659}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 8044692396672922073}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3247299634764857846
 GameObject:
   m_ObjectHideFlags: 0
@@ -297,6 +267,7 @@ GameObject:
   - component: {fileID: 8044692396672922074}
   - component: {fileID: 6203851538869258052}
   - component: {fileID: 3397134762869215759}
+  - component: {fileID: 889643384390420301}
   - component: {fileID: 681985310562537554}
   - component: {fileID: 5477647950941908820}
   - component: {fileID: 8740833075160548507}
@@ -321,7 +292,6 @@ Transform:
   m_Children:
   - {fileID: 3500482534380883460}
   - {fileID: 6099695818161787575}
-  - {fileID: 4471674393466432145}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -364,6 +334,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 3397134762869215759}
+  - {fileID: 889643384390420301}
   - {fileID: 681985310562537554}
   sceneViewId: 0
   InstantiationId: 0
@@ -410,6 +381,22 @@ MonoBehaviour:
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
+--- !u!114 &889643384390420301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8044692396672922075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!114 &681985310562537554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,28 +409,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9187f1c05a1f33a46a8af3979c6dd77b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigid: {fileID: 8740833075160548507}
-  anim: {fileID: 8044692396672922074}
-  PV: {fileID: 6203851538869258052}
-  gameManager: {fileID: 0}
-  objectData: {fileID: 0}
   speed: 3
   jumpForce: 400
   checkGroundDistance: 0.1
-  spawnCheck: 0
-  isFacingRight: 1
-  isGround: 0
-  isUpGround: 0
-  doubleJumpState: 0
-  isMove: 0
-  isJump: 0
+  level: 0
+  hp: 0
+  mp: 0
+  exp: 0
   canDoubleJump: 1
   walkSound: Walk
-  isInTransferObj: 0
-  transfer: {fileID: 0}
   scanObj: {fileID: 0}
   isNpcTrigger: 0
-  PreviouslandPositionY: 0
+  isInTransferObj: 0
 --- !u!82 &5477647950941908820
 AudioSource:
   m_ObjectHideFlags: 0
