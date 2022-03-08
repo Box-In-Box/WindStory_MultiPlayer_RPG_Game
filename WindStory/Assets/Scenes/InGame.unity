@@ -3075,6 +3075,38 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 753805585}
     m_Modifications:
+    - target: {fileID: 593706593971837005, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1313791867}
+    - target: {fileID: 593706593971837005, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: QuestdetailBtn
+      objectReference: {fileID: 0}
+    - target: {fileID: 593706593971837005, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: QuestManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 593706593971837005, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816601569486010816, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: rewards
+      value: "\uD14C\uC2A4\uD2B8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816601569486010816, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: progress
+      value: "\uD14C\uC2A4\uD2B8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816601569486010816, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: questName
+      value: "\uD14C\uC2A4\uD2B8 \uD018\uC2A4\uD2B8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816601569486010816, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+      propertyPath: discription
+      value: "\uD14C\uC2A4\uD2B8"
+      objectReference: {fileID: 0}
     - target: {fileID: 6906735244509684483, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_Text
       value: "\uD14C\uC2A4\uD2B8 \uD018\uC2A4\uD2B8"
@@ -3101,7 +3133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_AnchorMin.x
@@ -3109,11 +3141,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 540
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_SizeDelta.y
@@ -3149,11 +3181,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 280
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -35
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6906735245665128017, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -7145,7 +7177,7 @@ GameObject:
   - component: {fileID: 351020166}
   - component: {fileID: 351020165}
   m_Layer: 5
-  m_Name: QuestDiscription
+  m_Name: QuestDiscriptionText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12834,7 +12866,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &611480068
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16374,7 +16406,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -190}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &753805586
 MonoBehaviour:
@@ -24161,7 +24193,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -27556,7 +27588,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 219c53477af67a6449319dbadb4fd959, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  questID: 0
+  questObj: {fileID: 6906735245665128022, guid: f36335d1e2f074947b218cc5bf8cfaa9, type: 3}
+  questLogListContent: {fileID: 753805585}
+  QuestContent: {fileID: 1695023105}
 --- !u!4 &1313791868
 Transform:
   m_ObjectHideFlags: 0
